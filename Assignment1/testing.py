@@ -125,16 +125,15 @@ def task_3(train_data , train_sentiment , word_list):
         #print("training sentiment: ",train_sentiment[i])
       
         # checking the sentiment feature vector to append the positive and negative word dictionaries
-        if(train_sentiment[i] == 1):
-            for word in train_data[i]:
-                for item in word_list:
-                    if(word == item):
+       
+        for word in train_data[i]:
+            if(train_sentiment[i] == 1):
+                    if word in word_list:
                         word_appearences_pos[word] = word_appearences_pos[word] + 1
-        else:
-            for word in train_data[i]:
-                for item in word_list:
-                    if(word == item):
+            else:
+                if word in word_list:                 
                         word_appearences_neg[word] = word_appearences_neg[word] + 1
+        
                         
    
     #once the dictionaries are populated return them to be used in task 4            
@@ -169,15 +168,15 @@ def task_4(pos_wordset , neg_wordset , num_pos , num_neg):
     return positive_dict,negative_dict , positive_prior,negative_prior
 
 
-def task_5(pos_prior , neg_prior , review , pos_probs , neg_probs):
+def task_5(pos_prior , neg_prior , review , pos_likelihoods , neg_likelihoods):
     positive_likelihood = 0
     negative_likelihood = 0
    #here we instatiate two values for the positive and negative likelihood
     
     #for loop used to first check that the value of the words of the review are not none in the wordlist
     for word in review:
-        pos_value = pos_probs.get(word)
-        neg_value = neg_probs.get(word)
+        pos_value = pos_likelihoods.get(word)
+        neg_value = neg_likelihoods.get(word)
         #once the word pases the check the words logarithm value is added to the probability values of whichever list they exist in respectively
         if pos_value is not None:
             positive_likelihood = positive_likelihood + math.log(pos_value)
@@ -209,7 +208,7 @@ def task_6(df):
         false_positives = 0
         false_negatves = 0
         word_length = k
-        word_occurs = 1000
+        word_occurs = 150
        
         print("Word length is: " , k)
         
@@ -220,7 +219,7 @@ def task_6(df):
         check = 0
             
         #using task 2 to generate the target words from the training review set and returns a list of words
-        training_words = task_2(training_data , 1000, k)
+        training_words = task_2(training_data , word_occurs, k)
 
         
         #this line does the same as above for the testing review data
@@ -271,7 +270,7 @@ def task_6(df):
     #using task 1 to generate the lists
     training_data, training_labels, testing_data, testing_labels ,positive_train_num , negative_train_num= task_1(data_frame , check)
     check = 0
-    test_words = task_2(training_data, 1000 , k_most_accurate)
+    test_words = task_2(training_data, word_occurs , k_most_accurate)
     for i in range(len(data)):
         prediction = task_5(pos_prior,neg_prior,data[i],pos_probabilities,neg_probabilities)
         if(prediction == 0 and target[i] == 0):
@@ -290,12 +289,6 @@ def task_6(df):
     print("False Negatives: ",false_negatves)
     accuracy = (true_negatives + true_positives)/(false_negatves + false_positives + true_negatives + true_negatives)
     print("Accuracy :", accuracy )
-    
-
-
-
-
-
     
     
 
