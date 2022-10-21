@@ -202,7 +202,7 @@ def task_6(df):
     most_accurate = 0
     k_most_accurate = 0
     
-    for k in range(1,5):
+    for k in range(1,11):
         true_positives = 0
         true_negatives = 0
         false_positives = 0
@@ -254,6 +254,7 @@ def task_6(df):
         accuracy = (true_negatives + true_positives)/(false_negatves + false_positives + true_negatives + true_negatives)
         print("Accuracy :", accuracy )
         mean_accuracy = mean_accuracy + accuracy
+        
         if accuracy > most_accurate:
             most_accurate = accuracy
             k_most_accurate = k
