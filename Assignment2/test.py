@@ -9,7 +9,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
-
+from sklearn import model_selection
+from sklearn import linear_model
+from sklearn import metrics
+from sklearn import svm
+from sklearn import neighbors
 
 dataframe = pd.read_csv("product_images.csv")
 def task1(df):
@@ -41,6 +45,59 @@ def task1(df):
         else:
             plt.imshow(ankleboot_set.iloc[1].values.reshape(28,28))
             plt.show()
-    return 1
+    labels = df["label"]
+    data = df.drop(['label'], axis=1)
+    return labels , data
 
-task1(dataframe)
+def task2(labels , data):
+    
+   train_data,test_data,train_target,test_target = model_selection.train_test_split(data, labels,test_size = 0.3)
+   for k in range(1,4):
+       print(k)
+        
+   return 0
+
+def kernel_function(x , y):
+    result = np.zeros((len(x) , len(y)))
+    for i in range(len(x)):
+        for j in range(len(y)):
+            result[i,j] = sum([(x[i][k]*y[j][k])**d for k in range(4) for d in range(1,4)])
+    return result
+
+def perceptron_classifier(train_data , train_labels , test_data, test_labels):
+    
+    clf = linear_model.Perceptron()
+    clf.fit(train_data , train_labels)
+    prediction = clf.predict(test_data)
+    score = metrics.accuracy_score(test_labels, prediction)
+    return 0
+def svm_classifier(train_data , train_labels , test_data , test_labels):
+    clf = svm.SVC(kernel = kernel_function)
+    clf.fit(train_data,train_labels)
+    prediction = clf.predict(test_data)
+    svm_score = metrics.accuracy_score(test_labels , prediction)
+    
+    return 0
+def knn_classifier(train_data , train_labels , test_data , test_labels , k, train_index, test_index):
+    knn_scores = []
+    for i in range(1,k):
+        scores = []
+        clf = neighbors.KNeighborsClassifier(n_neighbors=k)
+        clf.fit(train_data[train_index], train_labels[train_index])
+        prediction = clf.predict(train_data[test_index])
+        score = metrics.accuracy_score(train_labels[test_index] , prediction)
+        scores.append(score)
+    knn_scores.append(np.mean(scores))
+    best_k = np.argmax(knn_scores)+1
+    print("Best K: ", best_k)
+    
+    clf = neighbors.KNeighborsClassifier(n_neighbors = best_k)
+    clf.fit(train_data,train_labels)
+    prediction = clf.predict(test_data)
+    knn_score = metrics.accuracy_score(test_labels , prediction)
+    print("kNN score: ", knn_score)   
+    return 0;
+def decision_tree_classifier(train_data , train_labels , test_data, test_labels):
+    
+    return 0
+labels, data = task1(dataframe)
