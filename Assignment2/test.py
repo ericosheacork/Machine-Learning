@@ -14,6 +14,8 @@ from sklearn import linear_model
 from sklearn import metrics
 from sklearn import svm
 from sklearn import neighbors
+from sklearn import tree
+import timeit
 
 dataframe = pd.read_csv("product_images.csv")
 def task1(df):
@@ -52,6 +54,10 @@ def task1(df):
 def task2(labels , data):
     
    train_data,test_data,train_target,test_target = model_selection.train_test_split(data, labels,test_size = 0.3)
+   perceptron_best_score = []
+   svm_best_score = []
+   knn_best_score=[]
+   tree_best_score=[]
    for k in range(1,4):
        print(k)
         
@@ -97,10 +103,14 @@ def knn_classifier(train_data , train_labels , test_data , test_labels , k, trai
     knn_score = metrics.accuracy_score(test_labels , prediction)
     print("kNN score: ", knn_score)   
     return 0;
-def decision_tree_classifier(train_data , train_labels , test_data, test_labels):
-    min_ = np.min(train_data, axis=0)
-    max_ = np.max(train_data, axis=0)
-    granularity = (max_ - min_)/100
-    g2,g3 = np.meshgrid(np.arange(min_[2], max_[2], granularity[2]), np.arange(min_[3], max_[3], granularity[3]))
+def decision_tree_classifier(train_data , train_labels , test_data, test_labels , md):
+# =============================================================================
+#     min_ = np.min(train_data, axis=0)
+#     max_ = np.max(train_data, axis=0)
+#     granularity = (max_ - min_)/100
+#     g2,g3 = np.meshgrid(np.arange(min_[2], max_[2], granularity[2]), np.arange(min_[3], max_[3], granularity[3]))
+# =============================================================================
+    clf = tree.DecisionTreeClassifier(max_depth = md)
+    clf.fit()
     return 0
 labels, data = task1(dataframe)
