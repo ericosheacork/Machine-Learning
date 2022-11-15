@@ -103,7 +103,7 @@ def knn_classifier(train_data , train_labels , test_data , test_labels , k, trai
     knn_score = metrics.accuracy_score(test_labels , prediction)
     print("kNN score: ", knn_score)   
     return 0;
-def decision_tree_classifier(train_data , train_labels , test_data, test_labels , md):
+def decision_tree_classifier(train_data , train_labels , test_data, test_labels , md , train_index , test_index):
 # =============================================================================
 #     min_ = np.min(train_data, axis=0)
 #     max_ = np.max(train_data, axis=0)
@@ -111,6 +111,7 @@ def decision_tree_classifier(train_data , train_labels , test_data, test_labels 
 #     g2,g3 = np.meshgrid(np.arange(min_[2], max_[2], granularity[2]), np.arange(min_[3], max_[3], granularity[3]))
 # =============================================================================
     clf = tree.DecisionTreeClassifier(max_depth = md)
-    clf.fit()
+    clf.fit(train_data[train_index], train_labels[train_index])
+    prediction_train = clf.predict
     return 0
 labels, data = task1(dataframe)
