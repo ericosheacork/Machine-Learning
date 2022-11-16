@@ -51,15 +51,28 @@ def task1(df):
     data = df.drop(['label'], axis=1)
     return labels , data
 
-def task2(labels , data):
+def kfold_cross_validator(labels , data):
     
-   train_data,test_data,train_target,test_target = model_selection.train_test_split(data, labels,test_size = 0.3)
+   
    perceptron_best_score = []
    svm_best_score = []
    knn_best_score=[]
    tree_best_score=[]
-   for k in range(1,4):
-       print(k)
+   kf = model_selection.KFold(n_splits = 4)
+   perceptron_accuracy = []
+   svm_accuracy = []
+   knn_accuracy = []
+   tree_accuracy=[]
+   
+   data_sizes = [data[:300],data[:600], data[:1000] , data[:4000] , data[:10000] , data]
+   label_sizes = [labels[:300], labels[:600] , labels[:1000], labels[:4000] , labels[10000] , labels]
+   for i in range(0 , len(data_sizes)):
+       temp_data = data_sizes[i]
+       temp_labels = label_sizes[i]
+       train_data,test_data,train_target,test_target = model_selection.train_test_split(temp_data, temp_labels,test_size = 0.3)
+             
+       for train_index, test_index in kf.split(temp_data, temp_labels):
+           print("Ey")
         
    return 0
 
@@ -110,8 +123,11 @@ def decision_tree_classifier(train_data , train_labels , test_data, test_labels 
 #     granularity = (max_ - min_)/100
 #     g2,g3 = np.meshgrid(np.arange(min_[2], max_[2], granularity[2]), np.arange(min_[3], max_[3], granularity[3]))
 # =============================================================================
-    clf = tree.DecisionTreeClassifier(max_depth = md)
-    clf.fit(train_data[train_index], train_labels[train_index])
-    prediction_train = clf.predict
+    
+    for d in range(1,md):
+        clf = tree.DecisionTreeClassifier(max_depth = md)
+        clf.fit(train_data[train_index], train_labels[train_index])
+        prediction_train = clf.predict(train_data[train_index])
+        prediction_test = clf.predict(test_data[test_index])
     return 0
 labels, data = task1(dataframe)
