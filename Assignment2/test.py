@@ -79,7 +79,7 @@ def kfold_cross_validator(labels , data):
        print("I is : " , i)
        #getting the data and labels from their respective arrays
        temp_data = data_sizes[i]
-       
+
 
        temp_labels = label_sizes[i]
        #splitting the data into train data and test data, same for labels
@@ -201,16 +201,15 @@ def knn_classifier(train_data , train_labels , test_data , test_labels):
     knn_score = metrics.accuracy_score(test_labels , prediction)
     print(" Best kNN score: ", knn_score, "At K: " , best_k)
     return best_k, knn_score
-def decision_tree_classifier(train_data , train_labels , test_data, test_labels , md , train_index , test_index):
+def decision_tree_classifier(train_data , train_labels , test_data, test_labels):
 # =============================================================================
 #     min_ = np.min(train_data, axis=0)
 #     max_ = np.max(train_data, axis=0)
 #     granularity = (max_ - min_)/100
 #     g2,g3 = np.meshgrid(np.arange(min_[2], max_[2], granularity[2]), np.arange(min_[3], max_[3], granularity[3]))
 # =============================================================================
-    
-    for d in range(1,md):
-        clf = tree.DecisionTreeClassifier(max_depth = md)
+    for i in range(1,6):
+        clf = tree.DecisionTreeClassifier(max_depth = 100)
         clf.fit(train_data[train_index], train_labels[train_index])
         prediction_train = clf.predict(train_data[train_index])
         prediction_test = clf.predict(test_data[test_index])

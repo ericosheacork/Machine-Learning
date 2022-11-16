@@ -81,7 +81,7 @@ def task3():
 def main():
     task1()
     task2()
-    task3()
+    #task3()
     plt.show()
 
 main()
