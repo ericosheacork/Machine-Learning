@@ -77,8 +77,14 @@ def kfold_cross_validator(labels , data):
        temp_labels = label_sizes[i]
        #splitting the data into train data and test data, same for labels
        train_data,test_data,train_target,test_target = model_selection.train_test_split(temp_data, temp_labels,test_size = 0.3)
+       #calling the perceptron classifier
+       starttime = timeit.default_timer()
+       print("The start time is: " , starttime)
        x = perceptron_classifier(train_data, train_target, test_data, test_target) 
+       perceptron_time = timeit.default_timer() -starttime
+       print("Time taken for perceptron training: " , perceptron_time)
        svm = svm_classifier(train_data, train_target, test_data, test_target)
+       print("Time taken for svm training: " , timeit.default_timer() - perceptron_time)
        print('svm score is: ' ,svm)
        #printing the scores
        print("Perceptron Score :" , x)
@@ -88,8 +94,10 @@ def kfold_cross_validator(labels , data):
            perceptron_best_size = sizes[i]
        if svm == max(svm_scores):
            svm_best_size = sizes[i]
-       for train_index, test_index in kf.split(temp_data, temp_labels):
-           print()
+# =============================================================================
+#        for train_index, test_index in kf.split(temp_data, temp_labels):
+#            print()
+# =============================================================================
            
            
             
