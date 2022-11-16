@@ -56,14 +56,19 @@ def kfold_cross_validator(labels , data):
    
    perceptron_scores = []
    perceptron_best_size = 0
+   perceptron_t_times = []
+   perceptron_p_times = []
    svm_scores = []
    svm_best_size = 0
+   svm_t_times = []
+   svm_p_times = []
+   perceptron_times = []
    knn_scores=[]
    knn_best_size = 0
    tree_scores=[]
    tree_best_size = 0
    kf = model_selection.KFold(n_splits = 12)
-   sizes = [300,600,1000,4000,10000,14000]
+   sizes = [300,600,1000,4000,10000]
    
    #parameterizing the individual subframes of the data and labels dataframe into test sizes of rows
    data_sizes = [data[:300],data[:600], data[:1000] , data[:4000] , data[:10000]] #,data]
@@ -78,33 +83,57 @@ def kfold_cross_validator(labels , data):
        #splitting the data into train data and test data, same for labels
        train_data,test_data,train_target,test_target = model_selection.train_test_split(temp_data, temp_labels,test_size = 0.3)
        #calling the perceptron classifier
-       starttime = timeit.default_timer()
-       print("The start time is: " , starttime)
-       x = perceptron_classifier(train_data, train_target, test_data, test_target) 
-       perceptron_time = timeit.default_timer() -starttime
-       print("Time taken for perceptron training: " , perceptron_time)
-       svm = svm_classifier(train_data, train_target, test_data, test_target)
-       print("Time taken for svm training: " , timeit.default_timer() - perceptron_time)
-       print('svm score is: ' ,svm)
+       perceptron , p_t_time , p_p_time = perceptron_classifier(train_data, train_target, test_data, test_target)
+       svm , s_t_time , s_p_time= svm_classifier(train_data, train_target, test_data, test_target)
        #printing the scores
-       print("Perceptron Score :" , x)
-       perceptron_scores.append(x)
+       #print("Perceptron Score: " , perceptron)
+       #print("Perceptron Training Time: " , p_t_time)
+       #print("Perceptron Prediction Time: ", p_p_time)
+       perceptron_scores.append(perceptron)
+       perceptron_t_times.append(p_t_time)
+       perceptron_p_times.append(p_p_time)
+
        svm_scores.append(svm)
-       if x == max(perceptron_scores):
+       svm_t_times.append(s_t_time)
+       svm_p_times.append(s_p_time)
+
+       if perceptron == max(perceptron_scores):
            perceptron_best_size = sizes[i]
        if svm == max(svm_scores):
            svm_best_size = sizes[i]
-# =============================================================================
-#        for train_index, test_index in kf.split(temp_data, temp_labels):
-#            print()
-# =============================================================================
-           
-           
-            
-             
+   print("Average Perceptron Score: " , average(perceptron_scores))
+   print("Minimum Perceptron Score: ", min(perceptron_scores))
+   print("Maximum Perceptron Score: ", max(perceptron_scores))
    print("Best Perceptron Score: " , max(perceptron_scores), " At Size: ", perceptron_best_size)
+   print("=======================================================================================================================")
+   print("Average SVMJ Score: ", average(svm_scores))
+   print("Minimum Perceptron Score: ", min(svm_scores))
+   print("Maximum Perceptron Score: ", max(svm_scores))
    print("Best SVM Score: " , max(svm_scores) , " At Size: " , svm_best_size)
-     
+
+   for j in range(0,2):
+    if j ==0:
+        plt.xlabel("Sample Sizes")
+        plt.ylabel("Time taken")
+        plt.plot(sizes, perceptron_t_times ,label = "Training Time")
+        plt.plot( sizes,perceptron_p_times, label = "Prediction Time")
+        plt.legend()
+        plt.title("Perceptrons times over sample size")
+        plt.show()
+
+    if j ==1:
+        plt.xlabel("Sample Sizes")
+        plt.ylabel("Time taken")
+        plt.plot(sizes,svm_t_times, label = "Training Time")
+        plt.plot(sizes,svm_p_times, label = "Prediction Time")
+        plt.legend()
+        plt.title("SVM times over sample size")
+        plt.show()
+
+
+
+
+
         
    return 0
 
@@ -118,18 +147,30 @@ def kernel_function(x , y):
 def perceptron_classifier(train_data , train_labels , test_data, test_labels):
     
     clf = linear_model.Perceptron()
+    starttime = timeit.default_timer()
     clf.fit(train_data , train_labels)
+    training_time = timeit.default_timer() - starttime
+    print("Time taken for perceptron training: ", training_time)
+    starttime = timeit.default_timer()
     prediction = clf.predict(test_data)
+    prediction_time = timeit.default_timer() - starttime
+    print("Time taken for perceptron prediction: " , prediction_time)
     score = metrics.accuracy_score(test_labels, prediction)
-    return score
+    return score , training_time , prediction_time
 def svm_classifier(train_data , train_labels , test_data , test_labels):
-    clf = svm.SVC(kernel = 'linear')
+    clf = svm.SVC(kernel = 'rbf')
+    starttime = timeit.default_timer()
     clf.fit(train_data,train_labels)
+    training_time = timeit.default_timer() -starttime
+    print("Time taken for svm training: ", timeit.default_timer() - training_time)
+
+    starttime = timeit.default_timer()
     prediction = clf.predict(test_data)
+    prediction_time = timeit.default_timer() - starttime
+    print("Time taken for svm prediction: ", timeit.default_timer() - prediction_time)
     svm_score = metrics.accuracy_score(test_labels , prediction)
-    return svm_score
-    
-    return svm_score
+    print('svm score is: ', svm_score)
+    return svm_score , training_time , prediction_time
 def knn_classifier(train_data , train_labels , test_data , test_labels , k, train_index, test_index):
     knn_scores = []
     for i in range(1,k):
@@ -163,5 +204,8 @@ def decision_tree_classifier(train_data , train_labels , test_data, test_labels 
         prediction_train = clf.predict(train_data[train_index])
         prediction_test = clf.predict(test_data[test_index])
     return 0
+def average(array):
+    return sum(array)/len(array)
+
 labels, data = task1(dataframe)
 kfold_cross_validator(labels, data)
