@@ -54,25 +54,49 @@ def task1(df):
 def kfold_cross_validator(labels , data):
     
    
-   perceptron_best_score = []
-   svm_best_score = []
-   knn_best_score=[]
-   tree_best_score=[]
-   kf = model_selection.KFold(n_splits = 4)
-   perceptron_accuracy = []
-   svm_accuracy = []
-   knn_accuracy = []
-   tree_accuracy=[]
+   perceptron_scores = []
+   perceptron_best_size = 0
+   svm_scores = []
+   svm_best_size = 0
+   knn_scores=[]
+   knn_best_size = 0
+   tree_scores=[]
+   tree_best_size = 0
+   kf = model_selection.KFold(n_splits = 12)
+   sizes = [300,600,1000,4000,10000,14000]
    
-   data_sizes = [data[:300],data[:600], data[:1000] , data[:4000] , data[:10000] , data]
-   label_sizes = [labels[:300], labels[:600] , labels[:1000], labels[:4000] , labels[10000] , labels]
+   #parameterizing the individual subframes of the data and labels dataframe into test sizes of rows
+   data_sizes = [data[:300],data[:600], data[:1000] , data[:4000] , data[:10000]] #,data]
+   label_sizes = [labels[:300], labels[:600] , labels[:1000], labels[:4000] , labels[:10000]] #,labels]
+   
+   #testing the perceptron on different dataframe sizes
    for i in range(0 , len(data_sizes)):
+       print("I is : " , i)
+       #getting the data and labels from their respective arrays
        temp_data = data_sizes[i]
        temp_labels = label_sizes[i]
+       #splitting the data into train data and test data, same for labels
        train_data,test_data,train_target,test_target = model_selection.train_test_split(temp_data, temp_labels,test_size = 0.3)
-             
+       x = perceptron_classifier(train_data, train_target, test_data, test_target) 
+       svm = svm_classifier(train_data, train_target, test_data, test_target)
+       print('svm score is: ' ,svm)
+       #printing the scores
+       print("Perceptron Score :" , x)
+       perceptron_scores.append(x)
+       svm_scores.append(svm)
+       if x == max(perceptron_scores):
+           perceptron_best_size = sizes[i]
+       if svm == max(svm_scores):
+           svm_best_size = sizes[i]
        for train_index, test_index in kf.split(temp_data, temp_labels):
-           print("Ey")
+           print()
+           
+           
+            
+             
+   print("Best Perceptron Score: " , max(perceptron_scores), " At Size: ", perceptron_best_size)
+   print("Best SVM Score: " , max(svm_scores) , " At Size: " , svm_best_size)
+     
         
    return 0
 
@@ -89,14 +113,15 @@ def perceptron_classifier(train_data , train_labels , test_data, test_labels):
     clf.fit(train_data , train_labels)
     prediction = clf.predict(test_data)
     score = metrics.accuracy_score(test_labels, prediction)
-    return 0
+    return score
 def svm_classifier(train_data , train_labels , test_data , test_labels):
-    clf = svm.SVC(kernel = kernel_function)
+    clf = svm.SVC(kernel = 'linear')
     clf.fit(train_data,train_labels)
     prediction = clf.predict(test_data)
     svm_score = metrics.accuracy_score(test_labels , prediction)
+    return svm_score
     
-    return 0
+    return svm_score
 def knn_classifier(train_data , train_labels , test_data , test_labels , k, train_index, test_index):
     knn_scores = []
     for i in range(1,k):
@@ -131,3 +156,4 @@ def decision_tree_classifier(train_data , train_labels , test_data, test_labels 
         prediction_test = clf.predict(test_data[test_index])
     return 0
 labels, data = task1(dataframe)
+kfold_cross_validator(labels, data)
