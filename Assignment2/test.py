@@ -89,10 +89,12 @@ def kfold_cross_validator(labels , data):
        #calling the perceptron classifier
        perceptron , p_t_time , p_p_time = perceptron_classifier(train_data, train_target, test_data, test_target)
        svm , s_t_time , s_p_time= svm_classifier(train_data, train_target, test_data, test_target)
-       tree_t_time , tree_p_time , tree_accuracy = decision_tree_classifier(train_data , train_target , test_data , test_target)
-       tree_scores.append(tree_accuracy)
-       tree_t_times.append(tree_t_time)
-       tree_p_times.append(tree_p_time)
+      # tree_t_time , tree_p_time , tree_accuracy = decision_tree_classifier(train_data , train_target , test_data , test_target)
+       #tree_scores.append(tree_accuracy)
+       #tree_t_times.append(tree_t_time)
+       #tree_p_times.append(tree_p_time)
+       decision_tree_classifier(train_data , train_target , test_data , test_target)
+       
 
        perceptron_scores.append(perceptron)
        perceptron_t_times.append(p_t_time)
@@ -215,23 +217,28 @@ def knn_classifier(train_data , train_labels , test_data , test_labels):
     print(" Best kNN score: ", knn_score, "At K: " , best_k)
     return best_k, knn_score
 def decision_tree_classifier(train_data , train_labels , test_data, test_labels):
-    kf = model_selection.KFold(n_splits = 4)
-    accuracies = []
-    for i in range(1,6):
-        for train_index, test_index in kf.split(train_data):
-            clf = tree.DecisionTreeClassifier(max_depth = i)
-            starttime = timeit.default_timer()
-            clf.fit(train_data[train_index], train_labels[train_index])
-            t_time =  timeit.default_timer()-starttime
-            starttime = timeit.default_timer()
-            prediction_test = clf.predict(test_data[test_index])
-
-            p_time = timeit.default_timer() - starttime
-            accuracies.append(metrics.accuracy_score())
-
-            plt.figure()
-            tree.plot_tree(clf,class_names=["Sneaker" , "Ankleboot"], filled=True)
-    return t_time , p_time, np.mean(accuracies)
+# =============================================================================
+#     kf = model_selection.KFold(n_splits = 4)
+#     accuracies = []
+#     for i in range(1,6):
+#         for train_index, test_index in kf.split(train_data):
+#             clf = tree.DecisionTreeClassifier(max_depth = i)
+#             starttime = timeit.default_timer()
+#             clf.fit(train_data[train_index], train_labels[train_index])
+#             t_time =  timeit.default_timer()-starttime
+#             starttime = timeit.default_timer()
+#             prediction = clf.predict(test_data[test_index])
+# 
+#             p_time = timeit.default_timer() - starttime
+#             accuracies.append(metrics.accuracy_score(train_labels.iloc[test_index].values , prediction))
+# =============================================================================
+    for i in range(1,10):
+        clf = tree.DecisionTreeClassifier(max_depth=(5), random_state=(0))
+        clf.fit(train_data,train_labels)
+        plt.figure()
+        tree.plot_tree(clf,class_names=["Sneaker" , "Ankleboot"], filled=True)
+    #return t_time , p_time, np.mean(accuracies)
+    return 0
 def average(array):
     return sum(array)/len(array)
 
