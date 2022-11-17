@@ -67,6 +67,8 @@ def kfold_cross_validator(labels , data):
    knn_best_size = 0
    tree_scores=[]
    tree_best_size = 0
+   tree_p_times = []
+   tree_t_times = []
    kf = model_selection.KFold(n_splits = 12)
    sizes = [300,600,1000,4000,10000]
    
@@ -87,10 +89,11 @@ def kfold_cross_validator(labels , data):
        #calling the perceptron classifier
        perceptron , p_t_time , p_p_time = perceptron_classifier(train_data, train_target, test_data, test_target)
        svm , s_t_time , s_p_time= svm_classifier(train_data, train_target, test_data, test_target)
-       #printing the scores
-       #print("Perceptron Score: " , perceptron)
-       #print("Perceptron Training Time: " , p_t_time)
-       #print("Perceptron Prediction Time: ", p_p_time)
+       tree_t_time , tree_p_time , tree_accuracy = decision_tree_classifier(train_data , train_target , test_data , test_target)
+       tree_scores.append(tree_accuracy)
+       tree_t_times.append(tree_t_time)
+       tree_p_times.append(tree_p_time)
+
        perceptron_scores.append(perceptron)
        perceptron_t_times.append(p_t_time)
        perceptron_p_times.append(p_p_time)
@@ -98,14 +101,16 @@ def kfold_cross_validator(labels , data):
        svm_scores.append(svm)
        svm_t_times.append(s_t_time)
        svm_p_times.append(s_p_time)
+       
+       knn_k , k_score = knn_classifier(train_data,train_target ,test_data , test_target)
+       knn_scores.append(k_score)
+       knn_best_k.append(knn_k)
 
        if perceptron == max(perceptron_scores):
            perceptron_best_size = sizes[i]
        if svm == max(svm_scores):
            svm_best_size = sizes[i]
-       knn_k , k_score = knn_classifier(train_data,train_target ,test_data , test_target)
-       knn_scores.append(k_score)
-       knn_best_k.append(knn_k)
+       
    print("Average Perceptron Score: " , average(perceptron_scores))
    print("Minimum Perceptron Score: ", min(perceptron_scores))
    print("Maximum Perceptron Score: ", max(perceptron_scores))
@@ -123,7 +128,7 @@ def kfold_cross_validator(labels , data):
         plt.plot(sizes, perceptron_t_times ,label = "Training Time")
         plt.plot( sizes,perceptron_p_times, label = "Prediction Time")
         plt.legend()
-        plt.title("Perceptrons times over sample size")
+        plt.title("Perceptron times over sample size")
         plt.show()
 
     if j ==1:
@@ -133,6 +138,14 @@ def kfold_cross_validator(labels , data):
         plt.plot(sizes,svm_p_times, label = "Prediction Time")
         plt.legend()
         plt.title("SVM times over sample size")
+        plt.show()
+    if j ==2:
+        plt.xlabel("Sample Sizes")
+        plt.ylabel("Time taken")
+        plt.title("Decision Tree times over sample size")
+        plt.plot(sizes , tree_p_times, label= "Prediction Times")
+        plt.plot(sizes , tree_t_times , label= "Training Times")
+        plt.legend()
         plt.show()
 
 
@@ -178,12 +191,12 @@ def svm_classifier(train_data , train_labels , test_data , test_labels):
     return svm_score , training_time , prediction_time
 def knn_classifier(train_data , train_labels , test_data , test_labels):
 
-    kf = model_selection.KFold(n_splits=12)
+    kf = model_selection.KFold(n_splits=4)
     knn_scores = []
     k = 20
     for i in range(1,k):
         scores = []
-        for train_index , test_index in kf.split(train_data):
+        for train_index, test_index in kf.split(train_data):
             clf = neighbors.KNeighborsClassifier(n_neighbors=k)
             clf.fit(train_data.iloc[train_index].values, train_labels.iloc[train_index].values)
             prediction = clf.predict(train_data.iloc[test_index].values)
@@ -202,18 +215,23 @@ def knn_classifier(train_data , train_labels , test_data , test_labels):
     print(" Best kNN score: ", knn_score, "At K: " , best_k)
     return best_k, knn_score
 def decision_tree_classifier(train_data , train_labels , test_data, test_labels):
-# =============================================================================
-#     min_ = np.min(train_data, axis=0)
-#     max_ = np.max(train_data, axis=0)
-#     granularity = (max_ - min_)/100
-#     g2,g3 = np.meshgrid(np.arange(min_[2], max_[2], granularity[2]), np.arange(min_[3], max_[3], granularity[3]))
-# =============================================================================
+    kf = model_selection.KFold(n_splits = 4)
+    accuracies = []
     for i in range(1,6):
-        clf = tree.DecisionTreeClassifier(max_depth = 100)
-        clf.fit(train_data[train_index], train_labels[train_index])
-        prediction_train = clf.predict(train_data[train_index])
-        prediction_test = clf.predict(test_data[test_index])
-    return 0
+        for train_index, test_index in kf.split(train_data):
+            clf = tree.DecisionTreeClassifier(max_depth = i)
+            starttime = timeit.default_timer()
+            clf.fit(train_data[train_index], train_labels[train_index])
+            t_time =  timeit.default_timer()-starttime
+            starttime = timeit.default_timer()
+            prediction_test = clf.predict(test_data[test_index])
+
+            p_time = timeit.default_timer() - starttime
+            accuracies.append(metrics.accuracy_score())
+
+            plt.figure()
+            tree.plot_tree(clf,class_names=["Sneaker" , "Ankleboot"], filled=True)
+    return t_time , p_time, np.mean(accuracies)
 def average(array):
     return sum(array)/len(array)
 
