@@ -122,7 +122,6 @@ def kfold_cross_validator(labels , data):
    print("Minimum Perceptron Score: ", min(svm_scores))
    print("Maximum Perceptron Score: ", max(svm_scores))
    print("Best SVM Score: " , max(svm_scores) , " At Size: " , svm_best_size)
-   print(tree_scores)
    for j in range(0,5):
     if j ==0:
         plt.xlabel("Sample Sizes")
