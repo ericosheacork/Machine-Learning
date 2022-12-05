@@ -118,10 +118,16 @@ def kfold_cross_validator(labels , data):
    print("Maximum Perceptron Score: ", max(perceptron_scores))
    print("Best Perceptron Score: " , max(perceptron_scores), " At Size: ", perceptron_best_size)
    print("=======================================================================================================================")
-   print("Average SVMJ Score: ", average(svm_scores))
-   print("Minimum Perceptron Score: ", min(svm_scores))
-   print("Maximum Perceptron Score: ", max(svm_scores))
-   print("Best SVM Score: " , max(svm_scores) , " At Size: " , svm_best_size)
+   print("Average SVM Score: ", average(svm_scores))
+   print("Minimum SVM Score: ", min(svm_scores))
+   print("Maximum SVM Score: ", max(svm_scores))
+   print("SVM Scores", svm_scores)
+   print("Best SVM Score: ", max(svm_scores), " At Size: ", svm_best_size)
+   print("=======================================================================================================================")
+   print("Decision Tree Scores: ", tree_scores)
+   print("=======================================================================================================================")
+   print("KNN Scores", knn_scores)
+
    for j in range(0,5):
     if j ==0:
         plt.xlabel("Sample Sizes")
@@ -208,8 +214,10 @@ def knn_classifier(train_data , train_labels , test_data , test_labels):
     kf = model_selection.KFold(n_splits=4)
     knn_scores = []
     k = 20
+    starttime = timeit.default_timer()
     for i in range(1,k):
         scores = []
+
         for train_index, test_index in kf.split(train_data):
             clf = neighbors.KNeighborsClassifier(n_neighbors=k)
             clf.fit(train_data.iloc[train_index].values, train_labels.iloc[train_index].values)          
@@ -217,7 +225,9 @@ def knn_classifier(train_data , train_labels , test_data , test_labels):
             score = metrics.accuracy_score(train_labels.iloc[test_index].values , prediction)
             scores.append(score)
         knn_scores.append(np.mean(scores))
+        best_k_time = timeit.default_timer() - starttime
     print("best value: ",np.argmax(knn_scores))
+    print("Time Taken To find Best K: ",best_k_time)
     best_k = np.argmax(knn_scores)+1
     print("Best K: ", best_k)
     
@@ -229,7 +239,9 @@ def knn_classifier(train_data , train_labels , test_data , test_labels):
     prediction = clf.predict(test_data)
     predicton_time = timeit.default_timer() - starttime
     knn_score = metrics.accuracy_score(test_labels , prediction)
-    print(" Best kNN score: ", knn_score, "At K: " , best_k)
+    print("Best kNN score: ", knn_score, "At K: " , best_k)
+    print("Training Time for KNN: ", train_time)
+    print("Prediction Time for KNN: ", predicton_time)
     return best_k, knn_score , train_time , predicton_time
 def decision_tree_classifier(train_data , train_labels , test_data, test_labels):
     
